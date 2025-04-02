@@ -19,16 +19,11 @@ pub fn spr(
         .parent
         .expect("The recipient node should not be the root");
 
-    println!("SPR Start:");
-    println!("  donor: {} (parent: {})", donor, donor_parent);
-    println!("  recipient: {} (parent: {})", recipient, recipient_parent);
-
     let recipient_sibling = if flat_tree[recipient_parent].left_child.unwrap() == recipient {
         flat_tree[recipient_parent].right_child.unwrap()
     } else {
         flat_tree[recipient_parent].left_child.unwrap()
     };
-    println!("  recipient_sibling: {}", recipient_sibling);
 
     // Check if recipient's parent is the root
     // Show current values of variables
