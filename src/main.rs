@@ -76,7 +76,6 @@ pub fn spr(
         }
         flat_tree[donor].parent = Some(recipient_parent);
     }
-
 }
 
 fn main() {
