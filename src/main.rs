@@ -26,23 +26,12 @@ pub fn spr(
     };
 
     // Check if recipient's parent is the root
-    // Show current values of variables
-    println!("  Recipient's parent's parent: {:?}", flat_tree[recipient_parent].parent);
-    println!("  Recipient's parent left child: {:?}", flat_tree[recipient_parent].left_child);
-    println!("  Recipient's parent right child: {:?}", flat_tree[recipient_parent].right_child);
-    println!("  Recipient sibling: {:?}", recipient_sibling);
-    println!("  Recipient sibling parent: {:?}", flat_tree[recipient_sibling].parent);
-    println!("  Donor parent: {:?}", flat_tree[donor_parent].parent);
     if flat_tree[recipient_parent].parent.is_none() {
-        println!("  Recipient's parent {} is the root.", recipient_parent);
         // The recipient's sibling becomes the new root.
         flat_tree[recipient_sibling].parent = None;
         flat_tree.root = recipient_sibling;
-        println!("  New root set to recipient_sibling: {}", recipient_sibling);
-
         // Reassign the recipient's parent: attach it under the donor's parent.
         flat_tree[recipient_parent].parent = Some(donor_parent);
-        println!("  Set recipient_parent {}'s parent to donor_parent {}", recipient_parent, donor_parent);
 
         // Update the child pointer in recipient_parent: replace the recipient's parent's sister with the donor.
         if flat_tree[recipient_parent].left_child.unwrap() == recipient {
@@ -50,9 +39,7 @@ pub fn spr(
         } else {
             flat_tree[recipient_parent].left_child = Some(donor);
         }
-        println!("  In recipient_parent {}, replaced child {} with donor {}", recipient_parent, recipient, donor);
         flat_tree[recipient_parent].depth = Some(time);
-        println!("  Set recipient_parent {} depth to {}", recipient_parent, time);
 
         // Update donor_parent so that its child pointer now points to recipient_parent.
         if flat_tree[donor_parent].left_child.unwrap() == donor {
@@ -60,48 +47,36 @@ pub fn spr(
         } else {
             flat_tree[donor_parent].right_child = Some(recipient_parent);
         }
-        println!("  In donor_parent {}, replaced child {} with recipient_parent {}", donor_parent, donor, recipient_parent);
         // Finally, attach the donor under recipient_parent.
         flat_tree[donor].parent = Some(recipient_parent);
-        println!("  Set donor {}'s parent to recipient_parent {}", donor, recipient_parent);
     } else {
         // Normal case: recipient_parent is not the root.
         let recipient_grandparent = flat_tree[recipient_parent].parent;
-        println!("  Recipient's parent {} is not the root. Grandparent: {:?}", recipient_parent, recipient_grandparent);
 
         flat_tree[recipient_parent].parent = Some(donor_parent);
-        println!("  Set recipient_parent {}'s parent to donor_parent {}", recipient_parent, donor_parent);
         if flat_tree[recipient_parent].left_child.unwrap() == recipient {
             flat_tree[recipient_parent].left_child = Some(donor);
         } else {
             flat_tree[recipient_parent].right_child = Some(donor);
         }
-        println!("  In recipient_parent {}, replaced child {} with donor {}", recipient_parent, recipient, donor);
         flat_tree[recipient_parent].depth = Some(time);
-        println!("  Set recipient_parent {} depth to {}", recipient_parent, time);
 
         if let Some(gp) = recipient_grandparent {
-            println!("  Updating recipient_grandparent {} for recipient_parent {}", gp, recipient_parent);
             if flat_tree[gp].left_child.unwrap() == recipient_parent {
                 flat_tree[gp].left_child = Some(recipient_sibling);
             } else {
                 flat_tree[gp].right_child = Some(recipient_sibling);
             }
-            println!("  In grandparent {}, replaced child {} with recipient_sibling {}", gp, recipient_parent, recipient_sibling);
             flat_tree[recipient_sibling].parent = Some(gp);
-            println!("  Set recipient_sibling {}'s parent to grandparent {}", recipient_sibling, gp);
-        }
+                }
         if flat_tree[donor_parent].left_child.unwrap() == donor {
             flat_tree[donor_parent].left_child = Some(recipient_parent);
         } else {
             flat_tree[donor_parent].right_child = Some(recipient_parent);
         }
-        println!("  In donor_parent {}, replaced child {} with recipient_parent {}", donor_parent, donor, recipient_parent);
         flat_tree[donor].parent = Some(recipient_parent);
-        println!("  Set donor {}'s parent to recipient_parent {}", donor, recipient_parent);
     }
 
-    println!("SPR End.");
 }
 
 fn main() {
@@ -178,29 +153,7 @@ fn main() {
             None => String::from("None"),
         }
     }
-    // Debug print: flat tree before SPR.
-    println!("--- Flat tree BEFORE SPR ---");
-    // Print a header for the table.
-    println!(
-        "{:<6} {:<15} {:<10} {:<10} {:<10} {:<10}",
-        "Index", "Name", "Parent", "Left", "Right", "Depth"
-    );
 
-    // Iterate over the flat_tree vector (in its natural order) and print each node's details.
-    for (i, node) in flat_tree.nodes.iter().enumerate() {
-        println!(
-            "{:<6} {:<15} {:<10} {:<10} {:<10} {:<10}",
-            i,
-            node.name,
-            fmt_option(node.parent),
-            fmt_option(node.left_child),
-            fmt_option(node.right_child),
-            match node.depth {
-                Some(d) => format!("{:.2}", d),
-                None => String::from("None"),
-            }
-        );
-    }
 
     // Apply the SPR event with a fixed time (0.5).
     spr(&mut flat_tree, donor_index, recipient_index, 0.5);
@@ -211,35 +164,6 @@ fn main() {
         .position(|node| node.parent.is_none())
         .expect("No root found in the tree");
     flat_tree.root = root_index;
-    // Debug print: flat tree after SPR.
-    // Print the flat_tree vector in a table format.
-    // show root index
-    println!("Root index: {}", root_index);
-    println!("--- Flat tree after SPR (vector order) ---");
-    // Print a header for the table.
-    println!(
-        "{:<6} {:<15} {:<10} {:<10} {:<10} {:<10}",
-        "Index", "Name", "Parent", "Left", "Right", "Depth"
-    );
-
-    // Iterate over the flat_tree vector (in its natural order) and print each node's details.
-    for (i, node) in flat_tree.nodes.iter().enumerate() {
-        println!(
-            "{:<6} {:<15} {:<10} {:<10} {:<10} {:<10}",
-            i,
-            node.name,
-            fmt_option(node.parent),
-            fmt_option(node.left_child),
-            fmt_option(node.right_child),
-            match node.depth {
-                Some(d) => format!("{:.2}", d),
-                None => String::from("None"),
-            }
-        );
-    }
-
-
-    //panic!("Debug");
 
     // Reconstruct the node tree and update branch lengths based on node depths.
     let gene_tree = flat_tree.to_node();
